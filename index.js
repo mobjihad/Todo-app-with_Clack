@@ -2,7 +2,7 @@ import * as p from '@clack/prompts';
 import color from 'picocolors';
 
 
-const Todos = [
+let Todos = [
 
 
    {
@@ -23,7 +23,7 @@ const Todos = [
       Tag: "Uni",
       CompletionStatus: false,
 
-   }
+   },
 ];
 
 
@@ -56,6 +56,15 @@ const addTags = ({ value, label }) => {
    Tags.push({ value, label, });
 };
 
+const deleteTodos = (index) => {
+   Todos = Todos.filter((_, i) => i !== index);
+};
+
+const updateTodos = (index) => {
+   Todos[index] = { ...Todos[index], CompletionStatus: !Todos[index].CompletionStatus };
+};
+
+
 const addTodo = ({ Title, description, Deadline, Severity, Tag }) => {
 
    Todos.push({ Title, description, Deadline, Severity, Tag, CompletionStatus: false, });
@@ -65,10 +74,16 @@ async function main() {
 
    p.intro(`${color.bgCyan(color.black(' Welcome To The Todo App '))}`);
    while (true) {
-      //console.clear();
+      console.clear();
       p.note(`${color.black('Your Todos : ')}`);
-      p.note(Todos.map((x) => x.Title).join("\n\n"));
-      p.note(Tags.map((y) => y.value).join("\n\n"));
+      p.note(
+         Todos.map((x) =>
+            x.CompletionStatus
+               ? `${color.bgGreen(color.black(x.Title))}- ${x.description}`
+               : `${color.bgRed(color.black(x.Title))}- ${x.description}`)
+            .join("\n\n")
+      );
+      // p.note(Tags.map((y) => y.value).join("\n\n"));
       const command = await p.select({
 
          message: "Select An Option",
@@ -123,7 +138,7 @@ async function main() {
          case "T":
             const value = await p.text({
 
-               message: "Provide a tag Titile ",
+               message: "Provide a tag Title ",
                placeholder: " Office ",
                validate: (value) => {
                   if (value.length < 1) return "Can't leave the titile Empty";
@@ -138,7 +153,35 @@ async function main() {
             addTags({ value, label });
             break;
 
+         case "U":
 
+            const index = await p.select({
+               message: "Select a Severity Label",
+               options: Todos.map((Z, index) => ({
+                  value: index,
+                  label: Z.Title
+
+               })
+
+
+               )
+            });
+            updateTodos(index);
+            break;
+
+         case "D":
+            const delIndex = await p.select({
+               message: "Select a Todo to delete",
+               options: Todos.map((x, index) => ({
+                  value: index,
+                  label: x.Title
+               })
+
+
+               )
+            });
+            deleteTodos(delIndex);
+            break;
 
          case "Q":
 
